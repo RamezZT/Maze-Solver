@@ -1,10 +1,11 @@
-import { Maze } from "../../types";
+import { CellType, Maze } from "../../types";
 import { addWallsToMaze, generateMaze } from "./solveMaze";
 
 type State = {
   rows: number;
   cols: number;
   maze: Maze;
+  paths: CellType[][];
 };
 
 type Action =
@@ -19,6 +20,7 @@ const initialState: State = {
   rows: 3,
   cols: 3,
   maze: generateMaze(3, 3, 0, 8),
+  paths: [],
 };
 
 const mazeReducer = (state: State, action: Action): State => {
@@ -52,7 +54,7 @@ const setMazeRows = (state: State, newRow: number): State => {
   const newMaze = generateMaze(
     newRow,
     state.cols,
-    state.maze.sourceVal,
+    state.maze.source.val,
     newSink
   );
   return {
@@ -67,7 +69,7 @@ const setMazeCols = (state: State, newCol: number): State => {
   const newMaze = generateMaze(
     state.rows,
     newCol,
-    state.maze.sourceVal,
+    state.maze.source.val,
     newSink
   );
   return {
@@ -80,7 +82,6 @@ const setMazeCols = (state: State, newCol: number): State => {
 const setSource = (state: State, newSource: number): State => {
   return {
     ...state,
-
     maze: generateMaze(
       state.rows,
       state.cols,
@@ -91,12 +92,13 @@ const setSource = (state: State, newSource: number): State => {
   };
 };
 const setSink = (state: State, newSink: number): State => {
+  console.log(newSink);
   return {
     ...state,
     maze: generateMaze(
       state.rows,
       state.cols,
-      state.maze.sourceVal,
+      state.maze.source.val,
       newSink,
       state.maze.walls
     ),
@@ -107,8 +109,8 @@ const setWall = (state: State, newWall: number): State => {
   const newMaze = generateMaze(
     state.rows,
     state.cols,
-    state.maze.sourceVal,
-    state.maze.sinkVal,
+    state.maze.source.val,
+    state.maze.sink.val,
     state.maze.walls
   );
   addWallsToMaze(newMaze.cells, newMaze.walls, newWall);
@@ -117,3 +119,11 @@ const setWall = (state: State, newWall: number): State => {
     maze: newMaze,
   };
 };
+
+// const generatePaths = (state: State): State => {
+//   const paths = solveMaze(
+//     state.maze.sourceVal,
+//     state.maze.sinkVal,
+//     state.maze.cells
+//   );
+// };

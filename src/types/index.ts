@@ -11,8 +11,10 @@ export type CellType = {
 export type Maze = {
   cells: CellType[][];
   walls: [number, number][];
-  sourceVal: number;
-  sinkVal: number;
+  // sourceVal: number;
+  source: CellType;
+  sink: CellType;
+  // sinkVal: number;
 };
 
 export type PathInfo = {

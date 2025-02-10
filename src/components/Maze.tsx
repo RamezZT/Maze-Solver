@@ -1,27 +1,21 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 import Cell from "./Cell";
-import {
-  TRANSITION,
-  generatePathsAnimations,
-  solveMaze,
-} from "../lib/Maze/solveMaze";
+import { generatePathsAnimations, solveMaze } from "../lib/Maze/solveMaze";
 import { CellType, PathInfo } from "../types";
 import toast from "react-hot-toast";
 import { initialState, mazeReducer } from "../lib/Maze/MazeReducer";
 import useMotionTimeline, { Animation } from "../hooks/useMotionTimeline";
-import { AnimationOptions, motion, useAnimationControls } from "framer-motion";
+import { motion, useAnimationControls } from "framer-motion";
 
 const MazeGrid = () => {
   const [state, dispatch] = useReducer(mazeReducer, initialState);
   const [paths, setPaths] = useState<PathInfo[]>([]);
   const [duration, setDuration] = useState(0.2);
-  // const [validPath, setValidPath] = useState<CellType[]>([]);
   const [validPaths, setValidPaths] = useState<CellType[][]>([]);
   const [pathsToAnimate, setPathsToAnimate] = useState<Animation[]>([]);
   const { scope, stop } = useMotionTimeline(pathsToAnimate, 1);
   const mazeRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  console.log(paths);
   const handleDurationChange = (value: number) => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current); // Clear the existing timeout
@@ -35,10 +29,10 @@ const MazeGrid = () => {
     const target = event.target as HTMLElement;
     const cellElement: HTMLElement | null = target.closest(".cell");
     if (cellElement?.dataset.val) {
-      if (+cellElement.dataset.val === state.maze.sinkVal)
+      if (+cellElement.dataset.val === state.maze.sink.val)
         toast.error(`Sink and Source can't be the same`);
-      if (+cellElement.dataset.val === state.maze.sourceVal)
-        toast.error(`Source is already set to ${state.maze.sourceVal}`);
+      else if (+cellElement.dataset.val === state.maze.source.val)
+        toast.error(`Source is already set to ${state.maze.source.val}`);
       else {
         toast.success(`Source is now cell: ${cellElement.dataset.val}`);
         dispatch({ type: "SET_SOURCE", payload: +cellElement.dataset.val });
@@ -53,8 +47,9 @@ const MazeGrid = () => {
   const handleSetSink = (event: globalThis.MouseEvent) => {
     const target = event.target as HTMLElement;
     const cellElement: HTMLElement | null = target.closest(".cell");
+    const currSource = state.maze.source;
     if (cellElement?.dataset?.val) {
-      if (+cellElement.dataset.val === state.maze.sourceVal)
+      if (+cellElement.dataset.val === currSource.val)
         toast.error(`Sink and Source can't be the same`);
       else {
         toast.success(`Sink is now cell: ${cellElement.dataset.val}`);
@@ -69,10 +64,13 @@ const MazeGrid = () => {
   const handleSetWall = (event: globalThis.MouseEvent) => {
     const target = event.target as HTMLElement;
     const cellElement: HTMLElement | null = target.closest(".cell");
+    const currSource = state.maze.source;
+    const currSink = state.maze.sink;
+
     if (cellElement?.dataset?.val) {
-      if (+cellElement.dataset.val === state.maze.sourceVal)
+      if (+cellElement.dataset.val === currSource.val)
         toast.error(`Source can't be a wall`);
-      else if (+cellElement.dataset.val === state.maze.sinkVal)
+      else if (+cellElement.dataset.val === currSink.val)
         toast.error(`Sink can't be a wall`);
       else {
         toast.success(`cell: ${cellElement.dataset.val} is a wall now 🧱`);
@@ -87,6 +85,8 @@ const MazeGrid = () => {
   const handleStart = () => {
     let sourceCell: CellType | null = null;
     let sinkCell: CellType | null = null;
+
+    // check if the grid have a srouce and sink
     for (let i = 0; i < state.maze.cells.length; i++) {
       for (let j = 0; j < state.maze.cells[i].length; j++) {
         if (state.maze.cells[i][j].source) {
@@ -103,15 +103,11 @@ const MazeGrid = () => {
     if (!sourceCell) return alert("Couldn't find source cell");
     if (!sinkCell) return alert("Couldn't find sink cell");
     const paths = solveMaze(sourceCell, sinkCell, state.maze.cells);
-    setPaths(paths);
     const greenPaths = paths
       .filter((path) => path.validPath)
       .map((path) => path.path);
+    setPaths(paths);
     setValidPaths(greenPaths);
-    // if (validPath.validPath) {
-    //   console.log("setting path to", validPath);
-    //   setValidPath(validPath.path);
-    // }
   };
 
   const handleAddWall = () => {
@@ -128,9 +124,7 @@ const MazeGrid = () => {
   };
 
   useEffect(() => {
-    console.log("infinite rerenderings");
     const animation = generatePathsAnimations(paths);
-    console.log(animation);
     setPathsToAnimate(animation?.flatMap((anim) => anim) ?? []);
   }, [duration, paths, validPaths]);
 
@@ -177,18 +171,24 @@ const MazeGrid = () => {
           type="number"
           placeholder="Rows"
           value={state.rows}
-          onChange={(e) =>
-            dispatch({ type: "SET_ROWS", payload: +e.target.value })
-          }
+          onChange={(e) => {
+            if (+e.target.value <= 0 || +e.target.value > 5) {
+              return alert("Value should be between 0 and 5");
+            }
+            dispatch({ type: "SET_ROWS", payload: +e.target.value });
+          }}
         />
         <input
           className="rounded-md p-2"
           type="number"
           placeholder="Cols"
           value={state.cols}
-          onChange={(e) =>
-            dispatch({ type: "SET_COLS", payload: +e.target.value })
-          }
+          onChange={(e) => {
+            if (+e.target.value <= 0 || +e.target.value > 5) {
+              return alert("Value should be between 0 and 5");
+            }
+            dispatch({ type: "SET_COLS", payload: +e.target.value });
+          }}
         />
       </div>
       {/* Maze Grid */}
@@ -203,8 +203,6 @@ const MazeGrid = () => {
         {state.maze.cells.flatMap((mazeRow) =>
           mazeRow.map((cell) => {
             const { col, key, row, sink, source, val, wall } = cell;
-            // const animate = generateCellAnimations(cell);
-            const animate = {};
             return (
               <Cell
                 // ref={source ? sourceCellRef : sink ? sinkCellRef : null}
@@ -214,7 +212,6 @@ const MazeGrid = () => {
                 source={source}
                 sink={sink}
                 wall={wall}
-                {...animate}
                 key={key}
               />
             );

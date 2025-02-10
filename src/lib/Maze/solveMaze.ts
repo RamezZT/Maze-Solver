@@ -1,5 +1,5 @@
 import { AnimationOptions } from "framer-motion";
-import { CellType, Maze, Path, PathInfo } from "../../types";
+import { CellType, Maze, PathInfo } from "../../types";
 import { Animation } from "../../hooks/useMotionTimeline";
 
 const DIRS = [
@@ -9,12 +9,13 @@ const DIRS = [
   [0, -1],
 ];
 
+// const memo=new Map<number,>();
 export const solveMaze = (
   source: CellType,
   sink: CellType,
   cells: CellType[][]
-): Path[] => {
-  const paths = [] as { validPath: boolean; path: CellType[] }[];
+): PathInfo[] => {
+  const paths = [] as PathInfo[];
 
   const visitedCells = new Set<number>();
 
@@ -78,9 +79,19 @@ export const generateMaze = (
   const mazeLen = rows * cols;
   if (!source || source > mazeLen) source = 0;
 
+  const sourceCellIndex = [0, 0] as [number, number]; //[ row, col]
+  const sinkCellIndex = [rows - 1, cols - 1] as [number, number]; //[ row, col]
   const cells: CellType[][] = Array.from({ length: rows }).map((_, r) =>
     Array.from({ length: cols }).map((_, c) => {
       const cellValue = r * cols + c;
+      if (source === cellValue) {
+        sourceCellIndex[0] = r;
+        sourceCellIndex[1] = c;
+      }
+      if (sink === cellValue) {
+        sinkCellIndex[0] = r;
+        sinkCellIndex[1] = c;
+      }
       return {
         val: cellValue,
         row: r,
@@ -96,8 +107,8 @@ export const generateMaze = (
   for (const [c, r] of walls) cells[c][r].wall = true;
   return {
     cells,
-    sinkVal: sink,
-    sourceVal: source,
+    sink: cells[sinkCellIndex[0]][sinkCellIndex[1]],
+    source: cells[sourceCellIndex[0]][sourceCellIndex[1]],
     walls: [...walls],
   };
 };
@@ -139,24 +150,49 @@ export function generatePathsAnimations(
       // const pathAnimation = [];
       if (pathInfo.validPath) {
         const pathAnimation: Animation[] = [];
-        const resetAnimation: Animation[] = [];
+        const endPathAnimation: Animation[] = [];
+        const resetCellsAnimation: Animation[] = [];
         for (const cell of pathInfo.path) {
           const id = `.cell-${cell.val}`;
-          resetAnimation.push([
-            id,
-            { backgroundColor: "#fb923c", scale: 1 },
-            { ...TRANSITION }, // duration },
-          ]);
           pathAnimation.push([
             id,
             {
-              backgroundColor: "green",
+              backgroundColor: "#00cc00",
               scale: 1.1,
+              y: 0,
+              opacity: 1,
+              borderRadius: "16px",
             },
             { ...TRANSITION }, //duration },
           ]);
+          endPathAnimation.push([
+            id,
+            {
+              scale: 1,
+              y: -50,
+              opacity: 1,
+              content: 10,
+            },
+            { ...TRANSITION }, // duration },
+          ]);
+          resetCellsAnimation.push([
+            id,
+            {
+              content: 10,
+              backgroundColor: "#fb923c",
+              scale: 1,
+              y: 0,
+              opacity: 1,
+              borderRadius: 0,
+            },
+            { ...TRANSITION, duration: 2 }, // duration },
+          ]);
         }
-        validPathsAnimations.push([...pathAnimation, ...resetAnimation]);
+        validPathsAnimations.push([
+          ...pathAnimation,
+          endPathAnimation,
+          resetCellsAnimation,
+        ]);
       }
     }
     return validPathsAnimations;
