@@ -29,8 +29,7 @@ const MazeGrid = () => {
     const target = event.target as HTMLElement;
     const cellElement: HTMLElement | null = target.closest(".cell");
     if (cellElement?.dataset.val) {
-      if (+cellElement.dataset.val === state.maze.sink.val)
-        toast.error(`Sink and Source can't be the same`);
+      if (+cellElement.dataset.val === state.maze.sink.val) toast.error(`Sink and Source can't be the same`);
       else if (+cellElement.dataset.val === state.maze.source.val)
         toast.error(`Source is already set to ${state.maze.source.val}`);
       else {
@@ -40,8 +39,7 @@ const MazeGrid = () => {
     } else {
       toast.error("Please select a cell from the maze");
     }
-    if (mazeRef.current)
-      mazeRef.current.removeEventListener("click", handleSetSource);
+    if (mazeRef.current) mazeRef.current.removeEventListener("click", handleSetSource);
   };
 
   const handleSetSink = (event: globalThis.MouseEvent) => {
@@ -49,8 +47,7 @@ const MazeGrid = () => {
     const cellElement: HTMLElement | null = target.closest(".cell");
     const currSource = state.maze.source;
     if (cellElement?.dataset?.val) {
-      if (+cellElement.dataset.val === currSource.val)
-        toast.error(`Sink and Source can't be the same`);
+      if (+cellElement.dataset.val === currSource.val) toast.error(`Sink and Source can't be the same`);
       else {
         toast.success(`Sink is now cell: ${cellElement.dataset.val}`);
         dispatch({ type: "SET_SINK", payload: +cellElement.dataset.val });
@@ -58,8 +55,7 @@ const MazeGrid = () => {
     } else {
       toast.error("Please select a cell from the maze");
     }
-    if (mazeRef.current)
-      mazeRef.current.removeEventListener("click", handleSetSink);
+    if (mazeRef.current) mazeRef.current.removeEventListener("click", handleSetSink);
   };
   const handleSetWall = (event: globalThis.MouseEvent) => {
     const target = event.target as HTMLElement;
@@ -68,10 +64,8 @@ const MazeGrid = () => {
     const currSink = state.maze.sink;
 
     if (cellElement?.dataset?.val) {
-      if (+cellElement.dataset.val === currSource.val)
-        toast.error(`Source can't be a wall`);
-      else if (+cellElement.dataset.val === currSink.val)
-        toast.error(`Sink can't be a wall`);
+      if (+cellElement.dataset.val === currSource.val) toast.error(`Source can't be a wall`);
+      else if (+cellElement.dataset.val === currSink.val) toast.error(`Sink can't be a wall`);
       else {
         toast.success(`cell: ${cellElement.dataset.val} is a wall now 🧱`);
         dispatch({ type: "SET_WALL", payload: +cellElement.dataset.val });
@@ -79,8 +73,7 @@ const MazeGrid = () => {
     } else {
       toast.error("Please select a cell from the maze");
     }
-    if (mazeRef.current)
-      mazeRef.current.removeEventListener("click", handleSetWall);
+    if (mazeRef.current) mazeRef.current.removeEventListener("click", handleSetWall);
   };
   const handleStart = () => {
     let sourceCell: CellType | null = null;
@@ -103,9 +96,7 @@ const MazeGrid = () => {
     if (!sourceCell) return alert("Couldn't find source cell");
     if (!sinkCell) return alert("Couldn't find sink cell");
     const paths = solveMaze(sourceCell, sinkCell, state.maze.cells);
-    const greenPaths = paths
-      .filter((path) => path.validPath)
-      .map((path) => path.path);
+    const greenPaths = paths.filter((path) => path.validPath).map((path) => path.path);
     setPaths(paths);
     setValidPaths(greenPaths);
   };
@@ -159,11 +150,7 @@ const MazeGrid = () => {
 
   const controls = useAnimationControls();
   return (
-    <motion.div
-      animate={controls}
-      ref={scope}
-      className="w-full flex flex-col justify-center items-center gap-12"
-    >
+    <motion.div animate={controls} ref={scope} className="w-full flex flex-col justify-center items-center gap-12">
       {/* Inputs */}
       <div className="flex gap-2">
         <input
@@ -220,10 +207,7 @@ const MazeGrid = () => {
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex gap-2">
-          <button
-            onClick={handleChangeSource}
-            className="px-8 py-2 bg-green-500 rounded-md font-bold"
-          >
+          <button onClick={handleChangeSource} className="px-8 py-2 bg-green-500 rounded-md font-bold">
             Set Source
           </button>
           <button
@@ -232,18 +216,12 @@ const MazeGrid = () => {
           >
             Add wall
           </button>
-          <button
-            onClick={handleChangeSink}
-            className="px-8 py-2 bg-white rounded-md font-bold"
-          >
+          <button onClick={handleChangeSink} className="px-8 py-2 bg-white rounded-md font-bold">
             Set Sink
           </button>
         </div>
         <div className="flex w-full  bg-black gap-2">
-          <button
-            onClick={handleStart}
-            className="px-8 py-2 bg-blue-500 flex-1  rounded-md font-bold"
-          >
+          <button onClick={handleStart} className="px-8 py-2 bg-blue-500 flex-1  rounded-md font-bold">
             Start
           </button>
           <button
