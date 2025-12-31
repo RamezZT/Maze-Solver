@@ -10,20 +10,20 @@ import { motion, useAnimationControls } from "framer-motion";
 const MazeGrid = () => {
   const [state, dispatch] = useReducer(mazeReducer, initialState);
   const [paths, setPaths] = useState<PathInfo[]>([]);
-  const [duration, setDuration] = useState(0.2);
+  // const [duration, setDuration] = useState(0.2);
   const [validPaths, setValidPaths] = useState<CellType[][]>([]);
   const [pathsToAnimate, setPathsToAnimate] = useState<Animation[]>([]);
   const { scope, stop } = useMotionTimeline(pathsToAnimate, 1);
   const mazeRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const handleDurationChange = (value: number) => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current); // Clear the existing timeout
-    }
-    debounceRef.current = setTimeout(() => {
-      setDuration(value); // Update the state after the delay
-    }, 300); // 300ms debounce delay
-  };
+  // const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  // const handleDurationChange = (value: number) => {
+  //   if (debounceRef.current) {
+  //     clearTimeout(debounceRef.current); // Clear the existing timeout
+  //   }
+  //   debounceRef.current = setTimeout(() => {
+  //     setDuration(value); // Update the state after the delay
+  //   }, 300); // 300ms debounce delay
+  // };
 
   const handleSetSource = (event: globalThis.MouseEvent) => {
     const target = event.target as HTMLElement;
@@ -117,7 +117,7 @@ const MazeGrid = () => {
   useEffect(() => {
     const animation = generatePathsAnimations(paths);
     setPathsToAnimate(animation?.flatMap((anim) => anim) ?? []);
-  }, [duration, paths, validPaths]);
+  }, [paths, validPaths]);
 
   // function generatePathsAnimations() {
   //   if (paths.length) {
@@ -233,14 +233,14 @@ const MazeGrid = () => {
             Pause
           </button>
         </div>
-        <input
+        {/* <input
           type="range"
           min={0.2}
           max={0.8}
           step={0.02}
           defaultValue={duration}
           onChange={(e) => handleDurationChange(1 - +e.target.value)}
-        />
+        /> */}
       </div>
     </motion.div>
   );

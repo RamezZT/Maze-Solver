@@ -10,11 +10,7 @@ const DIRS = [
 ];
 
 // const memo=new Map<number,>();
-export const solveMaze = (
-  source: CellType,
-  sink: CellType,
-  cells: CellType[][]
-): PathInfo[] => {
+export const solveMaze = (source: CellType, sink: CellType, cells: CellType[][]): PathInfo[] => {
   const paths = [] as PathInfo[];
 
   const visitedCells = new Set<number>();
@@ -113,11 +109,7 @@ export const generateMaze = (
   };
 };
 
-export const addWallsToMaze = (
-  maze: CellType[][],
-  prevWalls: [number, number][],
-  newWall: number
-) => {
+export const addWallsToMaze = (maze: CellType[][], prevWalls: [number, number][], newWall: number) => {
   // adding previous walls
   for (const [r, c] of prevWalls) maze[r][c].wall = true;
 
@@ -128,12 +120,7 @@ export const addWallsToMaze = (
   prevWalls.push([newWallRow, newWallCol]);
 };
 
-export const changeMazeSource = (
-  rows: number,
-  cols: number,
-  source: number,
-  sink: number
-) => {
+export const changeMazeSource = (rows: number, cols: number, source: number, sink: number) => {
   // we can't mutate the object so we will create a new one
   const newMaze = generateMaze(rows, cols, source, sink);
   return newMaze;
@@ -185,14 +172,10 @@ export function generatePathsAnimations(
               opacity: 1,
               borderRadius: 0,
             },
-            { ...TRANSITION, duration: 2 }, // duration },
+            { ...TRANSITION, duration: 0.8 }, // duration },
           ]);
         }
-        validPathsAnimations.push([
-          ...pathAnimation,
-          endPathAnimation,
-          resetCellsAnimation,
-        ]);
+        validPathsAnimations.push([...pathAnimation, endPathAnimation, resetCellsAnimation]);
       }
     }
     return validPathsAnimations;
