@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/cell.tsx","./src/components/maze.tsx","./src/components/oldmaze.tsx","./src/hooks/usemotiontimeline.tsx","./src/lib/maze/mazereducer.ts","./src/lib/maze/solvemaze.ts","./src/types/framer.ts","./src/types/index.ts"],"version":"5.7.3"}
