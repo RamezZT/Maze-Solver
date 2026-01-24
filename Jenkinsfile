@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+nodejs 'node'
+}
+
     stages {
 
         stage('Pre-build check (npm build)') {
