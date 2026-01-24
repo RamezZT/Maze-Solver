@@ -2,21 +2,37 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+
+        stage('Pre-build check (npm build)') {
             steps {
-                echo "Building the project..."
+                sh 'node -v'
+                sh 'npm -v'
+                sh 'npm ci'
+                sh 'npm run build'
             }
         }
 
-        stage('Test') {
+        stage('Docker build') {
             steps {
-                echo "Running tests..."
+                sh 'docker build -t yourname/yourapp:latest .'
             }
         }
 
-        stage('Deploy') {
+        stage('Push image') {
+            when {
+                branch 'main'
+            }
             steps {
-                echo "Deploying the project..."
+                withCredentials([usernamePassword(
+                    credentialsId: 'Docker',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push yourname/yourapp:latest
+                    '''
+                }
             }
         }
     }
