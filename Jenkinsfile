@@ -18,7 +18,7 @@ nodejs 'node'
 
         stage('Docker build') {
             steps {
-                sh 'docker build -t yourname/yourapp:latest .'
+                sh 'docker build -t ramezzt/mazeSolver:latest .'
             }
         }
 
