@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     tools {
-nodejs 'node'
-}
+        nodejs 'node'
+    }
 
     stages {
 
-        stage('Pre-build check (npm build)') {
+        stage('Pre-build (npm)') {
             steps {
                 sh 'node -v'
                 sh 'npm -v'
@@ -17,14 +17,25 @@ nodejs 'node'
         }
 
         stage('Docker build') {
+            agent {
+                docker {
+                    image 'docker:26-cli'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
             steps {
+                sh 'docker version'
                 sh 'docker build -t ramezzt/mazeSolver:latest .'
             }
         }
 
         stage('Push image') {
-            when {
-                branch 'main'
+            when { branch 'main' }
+            agent {
+                docker {
+                    image 'docker:26-cli'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                }
             }
             steps {
                 withCredentials([usernamePassword(
@@ -33,8 +44,8 @@ nodejs 'node'
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push yourname/yourapp:latest
+                      echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                      docker push ramezzt/mazeSolver:latest
                     '''
                 }
             }
